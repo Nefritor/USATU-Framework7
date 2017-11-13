@@ -1,0 +1,25 @@
+.profile-menu {
+    height: 50px;
+}
+
+.name-menu{
+    font-size: 13px;
+    float: left;
+    margin-right: 5px;
+}
+
+.surname-menu{
+    font-size: 13px;
+    float: left;
+}
+
+.group-menu{
+    font-size: 15px;
+    float: left;
+    margin-right: 5px;
+}
+
+.year-menu{
+    font-size: 15px;
+    float: left;
+}

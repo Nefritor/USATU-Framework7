@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <!-- Your app title -->
+    <title>My App</title>
+
+    <!-- This template defaults to the iOS CSS theme. To support both iOS and material design themes, see the Framework7 Tutorial at the link below:
+        http://www.idangero.us/framework7/tutorials/maintain-both-ios-and-material-themes-in-single-app.html
+     -->
+
+    <link rel="stylesheet" href="lib/framework7/css/framework7.material.min.css">
+    <link rel="stylesheet" href="lib/framework7/css/framework7.material.colors.min.css">
+    <link rel="stylesheet" href="lib/framework7/css/framework7-icons.css">
+    <link rel="stylesheet" href="lib/framework7/css/framework7.additive.css">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbyky8o9rXFGFGmX14l-GHNaXbrD8Q5o4&callback=initMap"
+            async defer></script>
+    <script type="text/javascript" src="js/gmaps.js"></script>
+</head>
+
+<body>
+    <!-- Status bar overlay for full screen mode (PhoneGap) -->
+    <div class="statusbar-overlay"></div>
+
+    <!-- Views -->
+    <div class="views">
+        <!-- Your main view, should have "view-main" class -->
+        <div class="view view-main">
+            <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
+            <div class="pages navbar-through toolbar-through">
+                <!-- Page, "data-page" contains page name -->
+                <div data-page="index" class="page">
+                    <!-- Scrollable page content -->
+                    <div class="page-content">
+                        <!-- Top Navbar-->
+                        <div class="navbar">
+                            <div class="navbar-inner">
+                                <div class="left">
+                                    <!--
+                                      Right link contains only icon - additional "icon-only" class
+                                      Additional "open-panel" class tells app to open panel when we click on this link
+                                    -->
+                                    <!--<a href="#" class="link icon-only open-panel"><i class="icon icon-bars"></i></a>-->
+                                </div>
+                                <!-- We need cool sliding animation on title element, so we have additional "sliding" class -->
+                                <div class="center sliding">Загрузка...</div>
+                            </div>
+                        </div>
+
+                        <div class="content-block">
+                            <!-- Link to another page -->
+                            <!--<p><a href="map.html">About app</a></p>
+                            <p><a class="open-login-screen">Open page with Login Screen</a></p>
+                            <p><a href="#" class="open-popup" data-popup=".popup-edit">Open account edit</a></p>
+                            <div id="aaa"></div>-->
+                        </div>
+                    </div>
+                    <div class="login-screen"> <!-- modal-in -->
+                        <div class="view">
+                            <div class="page">
+                                <div class="page-content login-screen-content">
+                                    <div class="login-screen-title">Вход</div>
+                                    <!--<div style="position: absolute; top: 16px; right: 0px">
+                                        <a href="#" class="close-login-screen" style="float: right; width: max-content; margin-right: 16px;"><i class="f7-icons">close</i></a>
+                                    </div>-->
+                                    <form id="user-login">
+                                        <div class="list-block">
+                                            <ul>
+                                                <li class="item-content">
+                                                    <div class="item-inner">
+                                                        <div class="item-title label">Логин</div>
+                                                        <div class="item-input">
+                                                            <input type="text" name="username" placeholder="Ваш логин">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="item-content">
+                                                    <div class="item-inner">
+                                                        <div class="item-title label">Пароль</div>
+                                                        <div class="item-input">
+                                                            <input type="password" name="password" placeholder="Ваш пароль">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="list-block">
+                                            <ul>
+                                                <li><a href="#" class="button button-fill login-button" style="float: left; width: max-content; margin-left: 16px;">Войти</a></li>
+                                            </ul>
+                                            <ul>
+                                                <li><a href="#" class="button button-fill open-popup" data-popup=".popup-reg" style="float: left; width: max-content; margin-left: 16px;">Регистрация</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="list-block-label">
+
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Bottom Toolbar-->
+                <div class="toolbar toolbar-bottom">
+                    <div class="toolbar-inner" style="padding: 0px 30px">
+                        <!-- Toolbar links -->
+                        <a href="quests.html" class="link"><i class="f7-icons">home_fill</i></a>
+                        <a href="map.html" class="link"><i class="f7-icons">world_fill</i></a>
+                        <a href="profile.html" class="link"><i class="f7-icons">person</i></a>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <div class="popup popup-reg">
+        <div class="content-block">
+            <div class="login-screen"> <!-- modal-in -->
+                <div class="view">
+                    <div class="page">
+                        <div class="page-content login-screen-content">
+                            <div class="login-screen-title">Регистрация</div>
+                            <!--<div style="position: absolute; top: 16px; right: 0px">
+                                <a href="#" class="close-login-screen" style="float: right; width: max-content; margin-right: 16px;"><i class="f7-icons">close</i></a>
+                            </div>-->
+                            <form id="reg-login">
+                                <div class="list-block">
+                                    <ul>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Логин</div>
+                                                <div class="item-input">
+                                                    <input type="text" name="reg-username" id="reg-username" placeholder="Ваш логин">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Электронная почка</div>
+                                                <div class="item-input">
+                                                    <input type="email" name="reg-email" id="reg-email" placeholder="Ваша электронная почта">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Пароль</div>
+                                                <div class="item-input">
+                                                    <input type="password" name="reg-password" id="reg-pass" placeholder="Ваш пароль">
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="item-content">
+                                            <div class="item-inner">
+                                                <div class="item-title label">Подтвердите пароль</div>
+                                                <div class="item-input">
+                                                    <input type="password" name="reg-password-conf" id="reg-pass-conf" placeholder="Ваш пароль">
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="list-block">
+                                    <ul>
+                                        <li><a href="#" class="button button-fill reg-button" style="float: left; width: max-content; margin-left: 16px;">Зарегистрироваться</a></li>
+                                    </ul>
+                                    <ul>
+                                        <li><a href="#" class="button button-fill close-popup" data-popup=".popup-reg" style="float: left; width: max-content; margin-left: 16px;">Отменить</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-block-label">
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="popup popup-edit">
+        <div class="content-block">
+            <form id="edit-account">
+                <div class="content-block-title">Редактирование профиля</div>
+                <div class="list-block">
+                    <ul>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Имя</div>
+                                    <div class="item-input">
+                                        <input type="text" name="user-name" placeholder="Ваше имя">
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Фамилия</div>
+                                    <div class="item-input">
+                                        <input type="text" name="user-surname" placeholder="Ваша фамилия">
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Факультет</div>
+                                    <div class="item-input">
+                                        <select name="user-faculty">
+                                            <option>ФАДЭТ</option>
+                                            <option>ФАЭИ</option>
+                                            <option selected>ФИРТ</option>
+                                            <option>ИАТМ</option>
+                                            <option>ОНФ</option>
+                                            <option>ИНЭК</option>
+                                            <option>ИВТО</option>
+                                            <option>Вечерний факультет при УМПО</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Группа</div>
+                                    <div class="item-input">
+                                        <input type="text" name="user-spec" placeholder="Ваша группа">
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Курс</div>
+                                    <div class="item-input">
+                                        <input type="text" name="user-year" placeholder="Год обучения">
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Магистратура</div>
+                                    <div class="item-input">
+                                        <label class="label-switch">
+                                            <input type="checkbox" name="user-ismag">
+                                            <div class="checkbox"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="item-input">
+                    <a href="#" class="button button-fill edit-finish" style="float: left; width: max-content; margin-left: 16px;">Подтвердить</a>
+                    <a href="#" class="button button-fill close-popup edit-cancel" style="float: left; width: max-content; margin-left: 16px;">Отменить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="lib/framework7/js/framework7.min.js"></script>
+    <script type="text/javascript" src="js/my-app.js"></script>
+</body>
+
+</html>
