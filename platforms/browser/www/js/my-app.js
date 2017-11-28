@@ -10,6 +10,7 @@ var myApp = new Framework7({
 // If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
 var myId = '-1';
+var questId = '-1';
 var storedLogin = myApp.formGetData('stored-login');
 
 // Add view
@@ -194,7 +195,11 @@ function getQuestList() {
         if (data != '-1') {
             var questsObj = [];
             for (var i = 0; i < Object.keys(JSON.parse(data)).length; i++){
-                questsObj.push({ title: JSON.parse(data)[i]['task'], short_title: JSON.parse(data)[i]['short_desc'], long_title: JSON.parse(data)[i]['long_desc']});
+                questsObj.push({
+                    id: JSON.parse(data)[i]['id'],
+                    title: JSON.parse(data)[i]['task'],
+                    short_title: JSON.parse(data)[i]['short_desc'],
+                    long_title: JSON.parse(data)[i]['long_desc']});
             }
             var myList = myApp.virtualList('.ul-list-quests', {
                 // Array with items data
@@ -202,7 +207,7 @@ function getQuestList() {
                 // Template 7 template to render each item
                 template: '<li class="swipeout">' +
                     '<div class="swipeout-content">'+
-                        '<a href="#" data-picker=".picker-1" class="close-picker item-content item-link q1">'+
+                        '<a href="#" onclick="toFullQuest({{id}})" data-picker=".picker-1" class="close-picker item-content item-link">'+
                             '<div class="item-inner">'+
                                 '<div class="item-title-row">'+
                                     '<div class="item-title">{{title}}</div>'+
@@ -223,6 +228,11 @@ function getQuestList() {
             myApp.alert('Похоже, что заданий вообще нет)', 'Заданий не найдено...');
         }
     });
+}
+
+function toFullQuest(id){
+    questId = id;
+    mainView.router.loadPage('fullquest.html');
 }
 
 // Handle Cordova Device Ready Event
@@ -271,10 +281,34 @@ $$(document).on('pageInit', function (e) {
             });
         });
     } else if (page.name === 'quests'){
-        $$('.q1').on('click', function () {
-
-        });
         getQuestList();
+    } else if (page.name === 'fullquest') {
+        $$.post('http://nefritor.h1n.ru/php/getQuestInfo.php', {questId:questId},  function (data) {
+            if (data != '-1') {
+                $$('.quest-title').text(JSON.parse(data)['task']);
+                //$$('.quest-header').text(JSON.parse(data)['task']);
+                $$('.quest-full-description').text(JSON.parse(data)['long_desc']);
+
+                var map = new GMaps({
+                    div: '#mapmin',
+                    lat: -12.043333,
+                    lng: -77.028333
+                });
+
+                // Try HTML5 geolocation.
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(pos);
+                    });
+                }
+            } else {
+                myApp.alert('Не удалось получить информацию...', 'Ошибка');
+            }
+        });
     } else if (page.name === 'map'){
         var map = new GMaps({
             div: '#map',
