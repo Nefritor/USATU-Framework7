@@ -12,13 +12,16 @@ var $$ = Dom7;
 var myId = '-1';
 var questId = '-1';
 var storedLogin = myApp.formGetData('stored-login');
+var lrs = [];
+var subjectLayer = [];
+
+google.load('visualization', '1.0');
 
 // Add view
 var mainView = myApp.addView('.view-main', {
     // Because we want to use dynamic navbar, we need to enable it for this view:
     dynamicNavbar: true
 });
-
 
 //If user data (login) stored:
 if (!!storedLogin){
@@ -235,6 +238,63 @@ function toFullQuest(id){
     mainView.router.loadPage('fullquest.html');
 }
 
+function setLayer(fusionId, layerFillColor, layerType, floor) {
+
+    var fusionTable = fusionId; // usatu_b
+
+    lrs.forEach(function (t) {
+        t.setMap(null);
+    });
+
+    var sql = encodeURIComponent("SELECT 'geometry' FROM " + fusionTable + " WHERE floor = '" + floor + "'");
+
+    var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + sql);
+
+    var queryEnd = false;
+
+    query.send(function (response) {
+
+        numbOfPoly = response.getDataTable().getNumberOfRows();
+
+        for (var i2 = 0; i2 < numbOfPoly; i2++) {
+
+            var data = response.getDataTable().getValue(i2, 0);
+            //create a XML parser
+            if (window.DOMParser) {
+                var parser = new DOMParser();
+                var kml = parser.parseFromString(data, "text/xml");
+            } else { // Internet Explorer
+                var kml = new ActiveXObject("Microsoft.XMLDOM");
+                kml.loadXML(data);
+            }
+            //get the coordinates of Subject Polygon
+            var latLngs = kml.getElementsByTagName("coordinates")[0].childNodes[0].nodeValue.split(' ');
+
+            //create an array of LatLngs
+            var subLatLngs = [];
+            for (var i = 0; i < latLngs.length; i++) {
+                var latLng = latLngs[i].split(',');
+                //<coordinates> for this FusionTable comes in lng,lat format
+                subLatLngs.push(new google.maps.LatLng(latLng[1], latLng[0]));
+                //alert(latLng[1] + ' ' + latLng[0])
+            }
+            //initialize the polygon
+
+
+            subjectLayer[i2] = new google.maps.Polygon({
+                paths: subLatLngs,
+                clickable: false,
+                fillColor: layerFillColor,
+                strokeColor: 'black',
+                strokeWeight: 1,
+                map: map
+            });
+            lrs.push(subjectLayer[i2]);
+        }
+        queryEnd = true;
+    });
+}
+
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
@@ -310,11 +370,34 @@ $$(document).on('pageInit', function (e) {
             }
         });
     } else if (page.name === 'map'){
-        var map = new GMaps({
-            div: '#map',
-            lat: -12.043333,
-            lng: -77.028333
+
+
+        google.maps.visualRefresh = true;
+
+        var extent = new google.maps.LatLng(54.434823, 48.231956);
+
+        var mapOptions = {
+            zoom: 17,
+            center: extent,
+            mapTypeId: google.maps.MapTypeId.G_NORMAL_MAP
+        };
+
+        map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+
+        $$('#floorInput').on('change', function (e) {
+            var floor = $$('#floorInput').val();
+
+            //setLayer("1NcDztIrzBe6snO3FvBgnjo5_t22QGQxTFD9pLD5O", 'grey', 'b'); //box
+            setLayer("16ai3tdYd33ILnCqAvmT1OrycR9AwsyokPheaeIuT", 'black', 'ws', floor); //wall_structural
+            setLayer("1a_doiycTaH_TdhRje17V87Za72G--FRw708pqLye", 'black', 'wi', floor); //wall internal
+            setLayer("1CGzNxnd_gaHwHktnSxenk7iAE81AmMnUn3U_6RKL", 'grey', 's', floor); //stairs
+            setLayer("1lLrCatguaUEWVsH0mQio3kS4bqWY4ttTh5sXm7Dm", 'blue', 'p', floor); //placement
+            setLayer("1lIliqlFKAxA4gpgmU2VwpdVb6FSmphCribq9D0vc", 'grey', 'f', floor); //floor
+            setLayer("1zzD5dgvDZpv0o4rFe6Rq6Mm6fd4CsAowqpSh-N0p", 'grey', 'd', floor); //doors
         });
+
+        $$('#floorInput').trigger('change');
 
         // Try HTML5 geolocation.
         if (navigator.geolocation) {
@@ -323,7 +406,7 @@ $$(document).on('pageInit', function (e) {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                map.setCenter(pos);
+                //map.setCenter(pos);
             });
         }
     }
