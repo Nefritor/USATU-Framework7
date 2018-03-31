@@ -58,8 +58,9 @@
 }
 
 .profile-line-info {
-    width: 500px;
-    left: calc(50% - 250px);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     position: relative;
     color: #ffffff;
 }
@@ -70,6 +71,60 @@
     float: left;
 }
 
+.hidden {
+    display: none;
+}
+
+.floor-button-plus{
+    padding: 0px 8px;
+    height: 24px;
+    margin-top: 5px;
+    border: 1px solid #dedede;
+    border-radius: 2px;
+    top: 0;
+    left: 5px;
+    position: absolute;
+    cursor: pointer;
+}
+
+.floor-button-minus{
+    padding: 0px 10px;
+    height: 24px;
+    margin-top: 5px;
+    border: 1px solid #dedede;
+    border-radius: 2px;
+    top: 0;
+    right: 5px;
+    position: absolute;
+    cursor: pointer;
+}
+
+.floor-button{
+    transition: box-shadow 0.3s ease;
+}
+
+.floor-button:active{
+    box-shadow: inset 1px 1px 5px -3px #000;
+}
+
+.floor-info{
+    height: 24px;
+    width: 30px;
+    border: 1px solid #dedede;
+    margin-top: 5px;
+    border-radius: 2px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    cursor: default;
+}
+
 .list-block ul:after{
     background-color: transparent !important;
+}
+
+.quest-title {
+    font-weight: bold;
+    text-align: justify;
 }
