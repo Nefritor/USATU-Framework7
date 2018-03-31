@@ -67,7 +67,7 @@
                             </div>
                         </div>
 
-                        <div class="content-block">
+                        <div class="content-block ">
                             <!-- Link to another page -->
                             <!--<p><a href="map.html">About app</a></p>
                             <p><a class="open-login-screen">Open page with Login Screen</a></p>
@@ -81,7 +81,7 @@
                                 <div class="page-content login-screen-content">
                                     <div class="login-screen-title">Вход</div>
                                     <!--<div style="position: absolute; top: 16px; right: 0px">
-                                        <a href="#" class="close-login-screen" style="float: right; width: max-content; margin-right: 16px;"><i class="f7-icons">close</i></a>
+                                        <a href="#" class="close-login-screen" style="float: right; width: max-content; margin-right: 16px;"><i class="material-icons">close</i></a>
                                     </div>-->
                                     <form id="user-login">
                                         <div class="list-block">
@@ -127,9 +127,9 @@
                 <div class="toolbar toolbar-bottom">
                     <div class="toolbar-inner" style="padding: 0px 30px">
                         <!-- Toolbar links -->
-                        <a href="quests.html" class="link"><i class="f7-icons">home_fill</i></a>
-                        <a href="map.html" class="link"><i class="f7-icons">world_fill</i></a>
-                        <a href="profile.html" class="link"><i class="f7-icons">person</i></a>
+                        <a href="quests.html" class="link"><i class="material-icons">home</i></a>
+                        <a href="map.html" class="link"><i class="material-icons">map</i></a>
+                        <a href="profile.html" class="link"><i class="material-icons">account_circle</i></a>
                     </div>
                 </div>
         </div>
@@ -143,7 +143,7 @@
                         <div class="page-content login-screen-content">
                             <div class="login-screen-title">Регистрация</div>
                             <!--<div style="position: absolute; top: 16px; right: 0px">
-                                <a href="#" class="close-login-screen" style="float: right; width: max-content; margin-right: 16px;"><i class="f7-icons">close</i></a>
+                                <a href="#" class="close-login-screen" style="float: right; width: max-content; margin-right: 16px;"><i class="material-icons">close</i></a>
                             </div>-->
                             <form id="reg-login">
                                 <div class="list-block">
@@ -287,6 +287,80 @@
                     <a href="#" class="button button-fill close-popup edit-cancel" style="float: left; width: max-content; margin-left: 16px;">Отменить</a>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="picker-modal picker-info">
+        <div class="toolbar">
+            <div class="toolbar-inner">
+                <div class="left"><div style="padding-left: 15px">Ваше местоположение</div></div>
+                <div class="right"><a href="#" class="close-picker link" style="color: #fff; margin-right: -20px">Отменить</a></div>
+                <div class="right"><a href="#" class="close-picker link mypos-conf" style="color: #fff;">Подтвердить</a></div>
+            </div>
+        </div>
+        <div class="picker-modal-inner">
+            <div class="content-block">
+                <div class="list-block">
+                    <ul>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Этаж</div>
+                                    <div class="item-input">
+                                        <select id="mypos-floor">
+                                            <option>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                            <option>6</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Аудитория</div>
+                                    <div class="item-input">
+                                        <select id="mypos-audit"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popover popover-links-fullquest">
+        <div class="popover-angle"></div>
+        <div class="popover-inner">
+            <div class="list-block">
+                <ul>
+                    <li><a href="#" class="list-button item-link mypos-clear close-popover">Очистить данные местоположения</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="popover popover-links-quests">
+        <div class="popover-angle"></div>
+        <div class="popover-inner">
+            <div class="list-block">
+                <ul>
+                    <label class="label-checkbox item-content">
+                        <input type="checkbox" name="checkbox-showhidden">
+                        <div class="item-media">
+                            <i class="icon icon-form-checkbox"></i>
+                        </div>
+                        <div class="item-inner">
+                            <div class="item-title">Показывать удаленные</div>
+                        </div>
+                    </label>
+                </ul>
+            </div>
         </div>
     </div>
 
