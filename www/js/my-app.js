@@ -208,19 +208,25 @@ function getQuestList(showHidden, ptrUsing) {
     $$.post('http://nefritor.h1n.ru/php/getQuestList.php', {userid: myId}, function (data) {
         if (data !== '-1') {
             var questsObj = [];
-            var quests = [], hquests = [], hNotExist = true, hCount = 0;
+            var quests = [], hquests = [], complets = [], hNotExist = true, cNotExist = true; hCount = 0;
             for (var i = 0; i < Object.keys(JSON.parse(data)).length; i++){
                 questsObj.push({
                     id: JSON.parse(data)[i]['id'],
                     title: JSON.parse(data)[i]['task'],
                     short_title: JSON.parse(data)[i]['short_desc'],
                     long_title: JSON.parse(data)[i]['long_desc'],
-                    is_hidden: JSON.parse(data)[i]['is_hidden']
+                    is_hidden: JSON.parse(data)[i]['is_hidden'],
+                    is_completed: JSON.parse(data)[i]['is_completed']
                 });
-                if (JSON.parse(data)[i]['is_hidden']){
+                //alert(JSON.parse(data)[i]['id'] + ' ' + JSON.parse(data)[i]['is_hidden'] + ' ' + JSON.parse(data)[i]['is_completed']);
+                if (JSON.parse(data)[i]['is_hidden'] && JSON.parse(data)[i]['is_completed'] === '0'){
                     hNotExist = false;
                     hCount++
-                } else  hNotExist = true;
+                }
+
+                if (JSON.parse(data)[i]['is_completed'] === '1'){
+                    cNotExist = false;
+                }
             }
 
             if (questsObj.length === hCount)
@@ -232,6 +238,11 @@ function getQuestList(showHidden, ptrUsing) {
                 hquests.push('<li class="list-group-title">Удаленных заданий нет</li>');
             else
                 hquests.push('<li class="list-group-title">Удаленные задания</li>');
+
+            if (cNotExist)
+                complets.push('<li class="list-group-title">Завершенных заданий нет</li>');
+            else
+                complets.push('<li class="list-group-title">Завершенные задания</li>');
 
             questsObj.forEach(function(element) {
                 if (!element.is_hidden) {
@@ -252,7 +263,7 @@ function getQuestList(showHidden, ptrUsing) {
                         '<a onclick="deleteQuest(' + element.id + ')" class="swipeout-delete swipeout-overswipe">Удалить</a>'+
                         '</div>'+
                         '</li>')
-                } else {
+                } else if (element.is_completed === '0') {
                     hquests.push('<li class="swipeout">' +
                         '<div class="swipeout-content">'+
                         '<a href="#" onclick="toFullQuest(' + element.id + ')" data-picker=".picker-1" class="close-picker item-content item-link">'+
@@ -270,10 +281,25 @@ function getQuestList(showHidden, ptrUsing) {
                         '<a onclick="restoreQuest(' + element.id + ')" class="swipeout-delete bg-orange swipeout-overswipe">Восстановить</a>' +
                         '</div>'+
                         '</li>')
+                } else if (element.is_completed === '1'){
+                    complets.push('<li>' +
+                        '<a href="#" class="item-link item-content">' +
+                        '<div class="item-inner">'+
+                        '<div class="item-title-row">'+
+                        '<div class="item-title">' + element.title + '</div>'+
+                        '<div class="item-after">17:14</div>'+
+                        '</div>'+
+                        '<div class="item-text">' + element.short_title + '</div>'+
+                        '</div>'+
+                        '</li>')
                 }
             });
             var myList = myApp.virtualList('.ul-list-quests', { items: quests });
-            if (showHidden) myList.appendItems(hquests);
+            if (showHidden) {
+                myList.appendItems(hquests);
+                myList.appendItems(complets);
+            }
+
         } else {
             myApp.alert('Похоже, что заданий вообще нет)', 'Заданий не найдено...');
         }
@@ -458,6 +484,23 @@ $$(document).on('deviceready', function() {
     console.log("Device is ready!");
 });
 
+function scrollToTop(scrollDuration) {
+    const   scrollHeight = window.scrollY,
+        scrollStep = Math.PI / ( scrollDuration / 15 ),
+        cosParameter = scrollHeight / 2;
+    var     scrollCount = 0,
+        scrollMargin,
+        scrollInterval = setInterval( function() {
+            if ( window.scrollY != 0 ) {
+                scrollCount = scrollCount + 1;
+                scrollMargin = cosParameter - cosParameter * Math.cos( scrollCount * scrollStep );
+                window.scrollTo( 0, ( scrollHeight - scrollMargin ) );
+            }
+            else clearInterval(scrollInterval);
+        }, 15 );
+}
+
+
 // Option 2. Using one 'pageInit' event handler for all pages:
 $$(document).on('pageInit', function (e) {
     // Get page data from event data
@@ -514,6 +557,7 @@ $$(document).on('pageInit', function (e) {
             getQuestList($$('.item-content').find('input[type=checkbox][name="checkbox-showhidden"]').prop("checked"), true);
         });
     } else if (page.name === 'fullquest') {
+
         if (myPos === '-1')
             $$('.goto-begin').text("Задать начало");
         var qtype, qfloor, qtarget, mpfloor, mptarget;
@@ -600,7 +644,49 @@ $$(document).on('pageInit', function (e) {
         $$('.mypos-clear').on('click', function () {
             myPos = '-1';
             $$('.goto-begin').text("Задать начало");
+        });
+
+        var answfoc= false, codefoc = false;
+
+        $$('.input-text-answer').on('focus', function () {
+            answfoc = true;
+            if (!codefoc)
+                $('.page-content').animate({scrollTop: $$('.input-text-answer').offset().top}, 700, 'swing');
+            codefoc = false;
+        });
+
+        $$('.input-text-code').on('focus', function () {
+            codefoc = true;
+            if (!answfoc)
+                $('.page-content').animate({scrollTop: $$('.input-text-code').offset().top}, 700, 'swing');
+            answfoc = false;
+        });
+
+        $$('.quest-realiz').on('click', function () {
+            $('.page-content').stop().animate({scrollTop: $$('.input-text-code').offset().top}, 700, 'swing');
+        });
+        $$('.sendanswer-button').on('click', function () {
+            var answer = $$('.item-input').find('textarea[name="questanswer"]').val();
+            var code = $$('.item-input').find('input[name="questcode"]').val();
+            if (answer === '' || code === '') {
+                myApp.alert("Все поля должны быть заполнены", "Внимание!");
+            } else {
+                $$.post('http://nefritor.h1n.ru/php/saveQuestData.php', {userid:myId, questid:questId, useranswer: answer, usercode: code}, function (data) {
+                    if (data === '1'){
+                        myApp.alert('Задание успешно выполнено', "Поздравляем!");
+                        mainView.router.back({
+                            url: 'quests.html', // - in case you use Ajax pages
+                            force: true
+                        });
+                    } else if (data === '0'){
+                        myApp.alert('Вы ввели не верный код', "Внимание");
+                    } else if (data === '-1'){
+                        myApp.alert('Вы дали неверный ответ', "Ой-ой");
+                    }
+                });
+            }
         })
+
     } else if (page.name === 'map'){
 
         google.maps.visualRefresh = true;
