@@ -335,7 +335,7 @@ function setLayer(fusionId, layerFillColor, layerType, floor) {
         t.setMap(null);
     });
 
-    var sql = encodeURIComponent("SELECT 'geometry' FROM " + fusionTable + " WHERE floor = '" + floor + "'");
+    var sql = encodeURIComponent("SELECT 'geom' FROM " + fusionTable + " WHERE floor = '" + floor + "'");
 
     var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + sql);
 
@@ -381,8 +381,7 @@ function setLayer(fusionId, layerFillColor, layerType, floor) {
             lrs.push(subjectLayer[i2]);
         }
 
-        $$('.floor-button-plus').removeAttr('disabled'); //включаем возможность изменения floor
-        $$('.floor-button-minus').removeAttr('disabled');
+        setTimeout("$$('.floor-elem').removeAttr('disabled')", 1000); //включаем возможность изменения floor
 
         queryEnd = true;
     });
@@ -390,7 +389,7 @@ function setLayer(fusionId, layerFillColor, layerType, floor) {
 
 function fullAuditSelect(floor, selectElem) {
 
-    var sql = encodeURIComponent("SELECT 'Number' FROM 1llqZApKcWYLG7Wn18VpOnAiCPYNSiluQVzRa9Iar WHERE floor = '" + floor + "'");
+    var sql = encodeURIComponent("SELECT 'number' FROM 1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5 WHERE floor = '" + floor + "'");
     var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + sql);
     var queryEnd = false;
     var dataList = [];
@@ -426,7 +425,7 @@ function extentToAudit(audit) {
         t.setMap(null);
     });
 
-    var sql = encodeURIComponent("SELECT 'geometry' FROM 1llqZApKcWYLG7Wn18VpOnAiCPYNSiluQVzRa9Iar WHERE Number = '" + audit + "'");
+    var sql = encodeURIComponent("SELECT 'geom' FROM 1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5 WHERE number = '" + audit + "'");
     var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + sql);
     var queryEnd = false;
 
@@ -473,7 +472,7 @@ function extentToAudit(audit) {
             lng: longtit
         };
         map.setCenter(pos);
-        map.setZoom(20);
+        map.setZoom(17);
 
         queryEnd = true;
     });
@@ -575,21 +574,41 @@ $$(document).on('pageInit', function (e) {
 
                 var extent = new google.maps.LatLng(54.434823, 48.231956);
 
+                function CoordMapType(tileSize) {
+                    this.tileSize = tileSize;
+                }
+
+                CoordMapType.prototype.maxZoom = 17;
+                CoordMapType.prototype.minZoom = 14;
+                CoordMapType.prototype.name = 'Blank Map';
+                CoordMapType.prototype.alt = 'Tile Coordinate Map Type';
+
+                CoordMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
+                    var div = ownerDocument.createElement('div');
+                    return div;
+                };
+
                 var mapOptions = {
                     zoom: 17,
                     center: extent,
-                    mapTypeId: google.maps.MapTypeId.G_NORMAL_MAP,
+                    mapTypeId: 'coordinate',
+                    mapTypeControlOptions: {
+                        mapTypeIds: []
+                    },
                     gestureHandling: 'cooperative'
                 };
 
                 map = new google.maps.Map(document.getElementById("mapmin"), mapOptions);
 
-                google.setOnLoadCallback(setLayer("16ai3tdYd33ILnCqAvmT1OrycR9AwsyokPheaeIuT", 'black', 'ws', qfloor)); //wall_structural
-                google.setOnLoadCallback(setLayer("1a_doiycTaH_TdhRje17V87Za72G--FRw708pqLye", 'black', 'wi', qfloor)); //wall internal
-                google.setOnLoadCallback(setLayer("1CGzNxnd_gaHwHktnSxenk7iAE81AmMnUn3U_6RKL", 'grey', 's', qfloor)); //stairs
-                google.setOnLoadCallback(setLayer("1llqZApKcWYLG7Wn18VpOnAiCPYNSiluQVzRa9Iar", 'blue', 'p', qfloor)); //placement
-                google.setOnLoadCallback(setLayer("1lIliqlFKAxA4gpgmU2VwpdVb6FSmphCribq9D0vc", 'grey', 'f', qfloor)); //floor
-                google.setOnLoadCallback(setLayer("1zzD5dgvDZpv0o4rFe6Rq6Mm6fd4CsAowqpSh-N0p", 'grey', 'd', qfloor)); //doors
+                map.mapTypes.set('coordinate',
+                    new CoordMapType(new google.maps.Size(150, 150)));
+
+                google.setOnLoadCallback(setLayer("1Z5Foc0IP0N4z7u8Q3E-siabn6vzE6mNCUWa7kTNN", 'black', 'ws', qfloor)); //wall_structural
+                google.setOnLoadCallback(setLayer("1-yiNpbyp0jKW-RSMx9ffJxbsxz5K8fkeeBhmYCes", 'black', 'wi', qfloor)); //wall internal
+                google.setOnLoadCallback(setLayer("1KTChLin1RSNDYSVeq8ODbFTFSDCHcLyt07_8Ux_6", 'grey', 's', qfloor)); //stairs
+                google.setOnLoadCallback(setLayer("1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5", 'blue', 'p', qfloor)); //placement
+                google.setOnLoadCallback(setLayer("1fx6CDDB6rrzPeiN0Rmz5PEdPdq2tuJwO9szz4KVA", 'grey', 'f', qfloor)); //floor
+                google.setOnLoadCallback(setLayer("1B4X-Mgskw2lSwoabQea3e0AhNpaiPncKmnWdUdpT", 'grey', 'd', qfloor)); //doors
 
                 if (qtype === "A"){
                     extentToAudit(qtarget);
@@ -614,23 +633,23 @@ $$(document).on('pageInit', function (e) {
                 myApp.pickerModal('.picker-info');
                 $$('#mypos-floor').trigger('change');
             } else {
-                google.setOnLoadCallback(setLayer("16ai3tdYd33ILnCqAvmT1OrycR9AwsyokPheaeIuT", 'black', 'ws', myPos.split(':')[1])); //wall_structural
-                google.setOnLoadCallback(setLayer("1a_doiycTaH_TdhRje17V87Za72G--FRw708pqLye", 'black', 'wi', myPos.split(':')[1])); //wall internal
-                google.setOnLoadCallback(setLayer("1CGzNxnd_gaHwHktnSxenk7iAE81AmMnUn3U_6RKL", 'grey', 's', myPos.split(':')[1])); //stairs
-                google.setOnLoadCallback(setLayer("1llqZApKcWYLG7Wn18VpOnAiCPYNSiluQVzRa9Iar", 'blue', 'p', myPos.split(':')[1])); //placement
-                google.setOnLoadCallback(setLayer("1lIliqlFKAxA4gpgmU2VwpdVb6FSmphCribq9D0vc", 'grey', 'f', myPos.split(':')[1])); //floor
-                google.setOnLoadCallback(setLayer("1zzD5dgvDZpv0o4rFe6Rq6Mm6fd4CsAowqpSh-N0p", 'grey', 'd', myPos.split(':')[1])); //doors
+                google.setOnLoadCallback(setLayer("1Z5Foc0IP0N4z7u8Q3E-siabn6vzE6mNCUWa7kTNN", 'black', 'ws', myPos.split(':')[1])); //wall_structural
+                google.setOnLoadCallback(setLayer("1-yiNpbyp0jKW-RSMx9ffJxbsxz5K8fkeeBhmYCes", 'black', 'wi', myPos.split(':')[1])); //wall internal
+                google.setOnLoadCallback(setLayer("1KTChLin1RSNDYSVeq8ODbFTFSDCHcLyt07_8Ux_6", 'grey', 's', myPos.split(':')[1])); //stairs
+                google.setOnLoadCallback(setLayer("1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5", 'blue', 'p', myPos.split(':')[1])); //placement
+                google.setOnLoadCallback(setLayer("1fx6CDDB6rrzPeiN0Rmz5PEdPdq2tuJwO9szz4KVA", 'grey', 'f', myPos.split(':')[1])); //floor
+                google.setOnLoadCallback(setLayer("1B4X-Mgskw2lSwoabQea3e0AhNpaiPncKmnWdUdpT", 'grey', 'd', myPos.split(':')[1])); //doors
                 extentToAudit(myPos.split(':')[2]);
             }
         });
         $$('.goto-end').on('click', function () {
             if (qtype === "A"){
-                google.setOnLoadCallback(setLayer("16ai3tdYd33ILnCqAvmT1OrycR9AwsyokPheaeIuT", 'black', 'ws', qfloor)); //wall_structural
-                google.setOnLoadCallback(setLayer("1a_doiycTaH_TdhRje17V87Za72G--FRw708pqLye", 'black', 'wi', qfloor)); //wall internal
-                google.setOnLoadCallback(setLayer("1CGzNxnd_gaHwHktnSxenk7iAE81AmMnUn3U_6RKL", 'grey', 's', qfloor)); //stairs
-                google.setOnLoadCallback(setLayer("1llqZApKcWYLG7Wn18VpOnAiCPYNSiluQVzRa9Iar", 'blue', 'p', qfloor)); //placement
-                google.setOnLoadCallback(setLayer("1lIliqlFKAxA4gpgmU2VwpdVb6FSmphCribq9D0vc", 'grey', 'f', qfloor)); //floor
-                google.setOnLoadCallback(setLayer("1zzD5dgvDZpv0o4rFe6Rq6Mm6fd4CsAowqpSh-N0p", 'grey', 'd', qfloor)); //doors
+                google.setOnLoadCallback(setLayer("1Z5Foc0IP0N4z7u8Q3E-siabn6vzE6mNCUWa7kTNN", 'black', 'ws', qfloor)); //wall_structural
+                google.setOnLoadCallback(setLayer("1-yiNpbyp0jKW-RSMx9ffJxbsxz5K8fkeeBhmYCes", 'black', 'wi', qfloor)); //wall internal
+                google.setOnLoadCallback(setLayer("1KTChLin1RSNDYSVeq8ODbFTFSDCHcLyt07_8Ux_6", 'grey', 's', qfloor)); //stairs
+                google.setOnLoadCallback(setLayer("1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5", 'blue', 'p', qfloor)); //placement
+                google.setOnLoadCallback(setLayer("1fx6CDDB6rrzPeiN0Rmz5PEdPdq2tuJwO9szz4KVA", 'grey', 'f', qfloor)); //floor
+                google.setOnLoadCallback(setLayer("1B4X-Mgskw2lSwoabQea3e0AhNpaiPncKmnWdUdpT", 'grey', 'd', qfloor)); //doors
                 extentToAudit(qtarget);
             }
         });
@@ -691,53 +710,67 @@ $$(document).on('pageInit', function (e) {
 
         google.maps.visualRefresh = true;
 
-        var extent = new google.maps.LatLng(54.434823, 48.231956);
+        var extent = new google.maps.LatLng(60.8346931556014, 52.4292745271029);
+
+        function CoordMapType(tileSize) {
+            this.tileSize = tileSize;
+        }
+
+        CoordMapType.prototype.maxZoom = 17;
+        CoordMapType.prototype.minZoom = 14;
+        CoordMapType.prototype.name = 'Blank Map';
+        CoordMapType.prototype.alt = 'Tile Coordinate Map Type';
+
+        CoordMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
+            var div = ownerDocument.createElement('div');
+            return div;
+        };
 
         var mapOptions = {
-            zoom: 17,
+            zoom: 14,
             center: extent,
-            mapTypeId: google.maps.MapTypeId.G_NORMAL_MAP
+            streetViewControl: false,
+            mapTypeId: 'coordinate',
+            mapTypeControlOptions: {
+                mapTypeIds: []
+            }
         };
 
         map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-        $$('.floor-button-plus').on('click', function () {
-            if ($$('#floorInput').val() < 5) {
-                $$('#floorInput').val(parseInt($$('#floorInput').val()) + 1);
-                $$('.floor-info').text($$('#floorInput').val());
-                $$('#floorInput').trigger('change');
-            }
-        });
+        map.mapTypes.set('coordinate',
+            new CoordMapType(new google.maps.Size(150, 150)));
 
-        $$('.floor-button-minus').on('click', function () {
-            if ($$('#floorInput').val() > 1) {
-                $$('#floorInput').val(parseInt($$('#floorInput').val()) - 1);
-                $$('.floor-info').text($$('#floorInput').val());
-                $$('#floorInput').trigger('change');
-            }
+        $$('.floor-block').scrollTop($$('.floor-block').prop("scrollHeight"));
+
+        $$('.floor-elem').on('click', function () {
+            var flr = parseInt($(this).text());
+            $$('#floorInput').val(flr);
+            $$('.floor-elem').removeClass("floor-selected");
+            $(this).addClass("floor-selected");
+            $$('#floorInput').trigger('change');
         });
 
         $$('#floorInput').on('change', function (e) {
             var floor = $$('#floorInput').val();
-
-            $$('.floor-button-plus').attr({disabled: 'disabled'}); //отключаем возможность изменения floor, пока обрабатывается запрос
-            $$('.floor-button-minus').attr({disabled: 'disabled'});
+            $$('.floor-elem').attr({disabled: 'disabled'}); //отключаем возможность изменения floor, пока обрабатывается запрос
 
             //setLayer("1NcDztIrzBe6snO3FvBgnjo5_t22QGQxTFD9pLD5O", 'grey', 'b'); //box
-            google.setOnLoadCallback(setLayer("16ai3tdYd33ILnCqAvmT1OrycR9AwsyokPheaeIuT", 'black', 'ws', floor)); //wall_structural
-            google.setOnLoadCallback(setLayer("1a_doiycTaH_TdhRje17V87Za72G--FRw708pqLye", 'black', 'wi', floor)); //wall internal
-            google.setOnLoadCallback(setLayer("1CGzNxnd_gaHwHktnSxenk7iAE81AmMnUn3U_6RKL", 'grey', 's', floor)); //stairs
-            google.setOnLoadCallback(setLayer("1llqZApKcWYLG7Wn18VpOnAiCPYNSiluQVzRa9Iar", 'blue', 'p', floor)); //placement
-            google.setOnLoadCallback(setLayer("1lIliqlFKAxA4gpgmU2VwpdVb6FSmphCribq9D0vc", 'grey', 'f', floor)); //floor
-            google.setOnLoadCallback(setLayer("1zzD5dgvDZpv0o4rFe6Rq6Mm6fd4CsAowqpSh-N0p", 'grey', 'd', floor)); //doors
+            google.setOnLoadCallback(setLayer("1Z5Foc0IP0N4z7u8Q3E-siabn6vzE6mNCUWa7kTNN", 'black', 'ws', floor)); //wall_structural
+            google.setOnLoadCallback(setLayer("1-yiNpbyp0jKW-RSMx9ffJxbsxz5K8fkeeBhmYCes", 'black', 'wi', floor)); //wall internal
+            google.setOnLoadCallback(setLayer("1KTChLin1RSNDYSVeq8ODbFTFSDCHcLyt07_8Ux_6", 'grey', 's', floor)); //stairs
+            google.setOnLoadCallback(setLayer("1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5", 'blue', 'p', floor)); //placement
+            google.setOnLoadCallback(setLayer("1fx6CDDB6rrzPeiN0Rmz5PEdPdq2tuJwO9szz4KVA", 'grey', 'f', floor)); //floor
+            google.setOnLoadCallback(setLayer("1B4X-Mgskw2lSwoabQea3e0AhNpaiPncKmnWdUdpT", 'grey', 'd', floor)); //doors
             google.setOnLoadCallback(fullAuditSelect(floor, 'auditSelect'));
         });
+
+        $$('#floorInput').trigger('change');
 
         $$('#auditSelect').on('change', function () {
             extentToAudit($$('#auditSelect').val());
         });
 
-        $$('#floorInput').trigger('change');
 
         // Try HTML5 geolocation.
         if (navigator.geolocation) {
