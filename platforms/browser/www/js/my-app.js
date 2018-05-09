@@ -16,6 +16,9 @@ var questId = '-1';
 var storedLogin = myApp.formGetData('stored-login');
 var lrs = [];
 var auditLrs = [];
+var linePath = [];
+var markerPath = [];
+var floorStairs = [[0,3,6,30],[0,1,19,45],[0,1,19,39],[-2,-1,0,20],[0,1,8,20]];
 var subjectLayer = [];
 var mainPage;
 
@@ -478,6 +481,351 @@ function extentToAudit(audit) {
     });
 }
 
+function printPath(fS, fF, aS, aF, gtBegin) {
+
+    linePath.forEach(function (t) {
+        t.setMap(null);
+    });
+    markerPath.forEach(function (t) {
+        t.setMap(null);
+    });
+
+    var pathCollectInterval;
+
+    if (fS === fF) {
+        var sql = encodeURIComponent("SELECT * FROM 118SjCtfLA-YX1vNQgzPxbH-7Vzn1h0ARDF7K8HRT WHERE floor = '" + fS + "'");
+        var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + sql);
+        var queryEnd = false;
+
+        var pathData = [];
+
+        query.send(function (response) {
+
+           var numbOfPoly = response.getDataTable().getNumberOfRows();
+
+            for (var i = 0; i < numbOfPoly; i++) {
+
+                pathData.push({
+                    geom: response.getDataTable().getValue(i, 0),
+                    id: response.getDataTable().getValue(i, 1),
+                    near: response.getDataTable().getValue(i, 2),
+                    number: response.getDataTable().getValue(i, 4)
+                });
+            }
+            queryEnd = true;
+        });
+
+        pathCollectInterval = setInterval(pathCollected, 100, false);
+
+    } else {
+        var sql = encodeURIComponent("SELECT * FROM 118SjCtfLA-YX1vNQgzPxbH-7Vzn1h0ARDF7K8HRT");
+        var query = new google.visualization.Query('http://www.google.com/fusiontables/gvizdata?tq=' + sql);
+        var queryEnd = false;
+
+        var pathData = [];
+
+        query.send(function (response) {
+
+            var numbOfPoly = response.getDataTable().getNumberOfRows();
+
+            for (var i = 0; i < numbOfPoly; i++) {
+
+                pathData.push({
+                    geom: response.getDataTable().getValue(i, 0),
+                    id: response.getDataTable().getValue(i, 1),
+                    near: response.getDataTable().getValue(i, 2),
+                    floor: response.getDataTable().getValue(i, 3),
+                    number: response.getDataTable().getValue(i, 4)
+                });
+            }
+            queryEnd = true;
+        });
+
+        pathCollectInterval = setInterval(pathCollected, 100, true);
+
+    }
+
+    function pathCollected(isMultifloor) {
+
+        if (queryEnd) {
+            clearInterval(pathCollectInterval);
+
+            if (!isMultifloor) {
+                var startIndex = pathData.map(function (e) {
+                    return e.number;
+                }).indexOf(aS.toString());
+                var finIndex = pathData.map(function (e) {
+                    return e.number;
+                }).indexOf(aF.toString());
+                var startId = pathData[startIndex].id;
+                var finId = pathData[finIndex].id;
+                var paths = [];
+                var currentID = startId;
+                paths[parseInt(currentID)] = currentID;
+                var reach = false;
+
+                while (reach === false) {
+                    var near = [];
+                    near = pathData[parseInt(currentID)].near.split(',');
+                    near.forEach(function (id) {
+                        if (paths[parseInt(id)] !== -1)
+                            paths[parseInt(id)] = paths[parseInt(currentID)] + ',' + id;
+                    });
+
+                    paths[parseInt(currentID)] = -1;
+
+                    for (var i = 0; i < paths.length; i++) {
+                        if (paths[i] !== undefined && paths[i] !== -1) {
+                            currentID = i.toString();
+                            break;
+                        }
+                    }
+                    if (paths[parseInt(finId)] !== undefined)
+                        reach = true;
+                }
+
+                var pathIds = paths[parseInt(finId)].split(',');
+                var pathCoordinates = [];
+
+                pathIds.forEach(function (pid) {
+                    var parser = new DOMParser();
+                    var kml = parser.parseFromString(pathData[pathData.map(function (e) {
+                        return e.id;
+                    }).indexOf(parseInt(pid))].geom, "text/xml");
+                    var latLngs = kml.getElementsByTagName("coordinates")[0].childNodes[0].nodeValue.split(' ');
+                    pathCoordinates.push({
+                        lat: parseFloat(latLngs[0].split(',')[1]),
+                        lng: parseFloat(latLngs[0].split(',')[0])
+                    });
+                });
+
+                var markerA = new google.maps.Marker({
+                    position: pathCoordinates[0],
+                    map: map,
+                    label: 'A'
+                });
+
+                var markerB = new google.maps.Marker({
+                    position: pathCoordinates[pathCoordinates.length - 1],
+                    map: map,
+                    label: 'B'
+                });
+
+                var pathPolyline = new google.maps.Polyline({
+                    path: pathCoordinates,
+                    geodesic: true,
+                    strokeColor: '#ff3fa1',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 3,
+                    map: map
+                });
+
+                linePath.push(pathPolyline);
+                markerPath.push(markerA);
+                markerPath.push(markerB);
+            } else {
+                var targetId = -1,
+                    targetIdFin = -1,
+                    targets4 = [-2,-1,0,20],
+                    isStart = true,
+                    pathsFrom = [],
+                    pathsTo = [],
+                    stairsNumber = -1,
+                    sortedPathData = pathData.filter(x => x.floor === fS);
+
+                if (fS === '4' || fF === '4'){
+
+                    var startIndex = sortedPathData.map(function (e) {
+                        return e.number;
+                    }).indexOf(aS.toString());
+
+                    var dist = 100;
+                    var finId = -1;
+                    if (fF !== '4'){
+                        targets4.forEach(function (data) {
+                            if (Math.abs(data - startIndex) < dist) {
+                                dist = Math.abs(data - startIndex);
+                                finId = data;
+                            }
+                        });
+                        stairsNumber = targets4.indexOf(finId);
+                    } else {
+                        floorStairs[fS - 1].forEach(function (data) {
+                            if (Math.abs(data - startIndex) < dist) {
+                                if (floorStairs[fS - 1].indexOf(data) !== 0 && floorStairs[fS - 1].indexOf(data) !== 1) {
+                                    dist = Math.abs(data - startIndex);
+                                    finId = data;
+                                }
+                            }
+                        });
+                        stairsNumber = floorStairs[fS - 1].indexOf(finId);
+                    }
+                    var startId = sortedPathData[startIndex].id;
+                    var paths = [];
+                    var currentID = startId;
+                    paths[parseInt(currentID)] = currentID;
+                    var reach = false;
+
+                    while (reach === false) {
+                        var near = [];
+                        near = sortedPathData[parseInt(currentID)].near.split(',');
+                        near.forEach(function (id) {
+                            if (paths[parseInt(id)] === undefined)
+                                paths[parseInt(id)] = paths[parseInt(currentID)] + ',' + id;
+                        });
+
+                        paths[parseInt(currentID)] = -1;
+
+                        for (var i = 0; i < paths.length; i++) {
+                            if (paths[i] !== undefined && paths[i] !== -1) {
+                                currentID = i.toString();
+                                break;
+                            }
+                        }
+
+                        if (paths[parseInt(finId)] !== undefined){
+                            pathsFrom = paths[parseInt(finId)];
+                            reach = true;
+                        }
+                    }
+                } else {
+                    var startIndex = sortedPathData.map(function (e) {
+                        return e.number;
+                    }).indexOf(aS.toString());
+
+                    var dist = 100;
+                    var finId = -1;
+                    floorStairs[fS - 1].forEach(function (data) {
+                        if (Math.abs(data - startIndex) < dist) {
+                            dist = Math.abs(data - startIndex);
+                            finId = data;
+                        }
+                    });
+                    stairsNumber = floorStairs[fS - 1].indexOf(finId);
+
+
+                    var startId = sortedPathData[startIndex].id;
+                    var paths = [];
+                    var currentID = startId;
+                    paths[parseInt(currentID)] = currentID;
+                    var reach = false;
+
+                    while (reach === false) {
+                        var near = [];
+                        near = sortedPathData[parseInt(currentID)].near.split(',');
+                        near.forEach(function (id) {
+                            if (paths[parseInt(id)] !== -1)
+                                paths[parseInt(id)] = paths[parseInt(currentID)] + ',' + id;
+                        });
+                        paths[parseInt(currentID)] = -1;
+
+                        for (var i = 0; i < paths.length; i++) {
+                            if (paths[i] !== undefined && paths[i] !== -1) {
+                                currentID = i.toString();
+                                break;
+                            }
+                        }
+
+                        if (paths[parseInt(finId)] !== undefined){
+                            pathsFrom = paths[parseInt(finId)];
+                            reach = true;
+                        }
+                    }
+                }
+
+                sortedPathData = pathData.filter(x => x.floor === fF);
+
+                var startIndex = sortedPathData.map(function (e) {
+                    return e.number;
+                }).indexOf(aF.toString());
+
+                var finId;
+                if (fF !== '4'){
+                    finId = floorStairs[fF - 1][stairsNumber];
+                } else {
+                    finId = targets4[stairsNumber];
+                }
+
+                var startId = sortedPathData[startIndex].id;
+
+                var paths = [];
+                var currentID = startId;
+                paths[parseInt(currentID)] = currentID;
+                var reach = false;
+
+                while (reach === false) {
+                    var near = [];
+                    near = sortedPathData[parseInt(currentID)].near.split(',');
+                    near.forEach(function (id) {
+                        if (paths[parseInt(id)] !== -1)
+                            paths[parseInt(id)] = paths[parseInt(currentID)] + ',' + id;
+                    });
+
+                    paths[parseInt(currentID)] = -1;
+
+                    for (var i = 0; i < paths.length; i++) {
+                        if (paths[i] !== undefined && paths[i] !== -1) {
+                            currentID = i.toString();
+                            break;
+                        }
+                    }
+
+                    if (paths[parseInt(finId)] !== undefined){
+                        pathsTo = paths[parseInt(finId)];
+                        reach = true;
+                    }
+                }
+                if (gtBegin){
+                    var pathIds = pathsFrom.split(',');
+                    sortedPathData = pathData.filter(x => x.floor === fS);
+                } else {
+                    isStart = false;
+                    var pathIds = pathsTo.split(',');
+                    sortedPathData = pathData.filter(x => x.floor === fF);
+                }
+                var pathCoordinates = [];
+
+                pathIds.forEach(function (pid) {
+                    var parser = new DOMParser();
+                    var kml = parser.parseFromString(sortedPathData[sortedPathData.map(function (e) {
+                        return e.id;
+                    }).indexOf(parseInt(pid))].geom, "text/xml");
+                    var latLngs = kml.getElementsByTagName("coordinates")[0].childNodes[0].nodeValue.split(' ');
+                    pathCoordinates.push({
+                        lat: parseFloat(latLngs[0].split(',')[1]),
+                        lng: parseFloat(latLngs[0].split(',')[0])
+                    });
+                });
+
+                var markerA = new google.maps.Marker({
+                    position: pathCoordinates[0],
+                    map: map,
+                    label: isStart ? 'A' : 'B'
+                });
+
+                var markerB = new google.maps.Marker({
+                    position: pathCoordinates[pathCoordinates.length - 1],
+                    map: map,
+                    label: isStart ? 'B' : 'A'
+                });
+
+                var pathPolyline = new google.maps.Polyline({
+                    path: pathCoordinates,
+                    geodesic: true,
+                    strokeColor: '#ff3fa1',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 3,
+                    map: map
+                });
+
+                linePath.push(pathPolyline);
+                markerPath.push(markerA);
+                markerPath.push(markerB);
+            }
+        }
+    }
+}
+
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
@@ -639,7 +987,10 @@ $$(document).on('pageInit', function (e) {
                 google.setOnLoadCallback(setLayer("1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5", 'blue', 'p', myPos.split(':')[1])); //placement
                 google.setOnLoadCallback(setLayer("1fx6CDDB6rrzPeiN0Rmz5PEdPdq2tuJwO9szz4KVA", 'grey', 'f', myPos.split(':')[1])); //floor
                 google.setOnLoadCallback(setLayer("1B4X-Mgskw2lSwoabQea3e0AhNpaiPncKmnWdUdpT", 'grey', 'd', myPos.split(':')[1])); //doors
+
                 extentToAudit(myPos.split(':')[2]);
+
+                google.setOnLoadCallback(printPath(myPos.split(':')[1], qfloor, myPos.split(':')[2], qtarget, true));
             }
         });
         $$('.goto-end').on('click', function () {
@@ -650,7 +1001,10 @@ $$(document).on('pageInit', function (e) {
                 google.setOnLoadCallback(setLayer("1y-mDlD84jz7MZ9OHj-q6aFgE7RgRevJWPrKPveF5", 'blue', 'p', qfloor)); //placement
                 google.setOnLoadCallback(setLayer("1fx6CDDB6rrzPeiN0Rmz5PEdPdq2tuJwO9szz4KVA", 'grey', 'f', qfloor)); //floor
                 google.setOnLoadCallback(setLayer("1B4X-Mgskw2lSwoabQea3e0AhNpaiPncKmnWdUdpT", 'grey', 'd', qfloor)); //doors
+
                 extentToAudit(qtarget);
+
+                google.setOnLoadCallback(printPath(myPos.split(':')[1], qfloor, myPos.split(':')[2], qtarget, false));
             }
         });
         $$('#mypos-floor').on('change', function () {
@@ -771,9 +1125,12 @@ $$(document).on('pageInit', function (e) {
             extentToAudit($$('#auditSelect').val());
         });
 
+        $$('.build-route').on('click', function () {
+
+        });
 
         // Try HTML5 geolocation.
-        if (navigator.geolocation) {
+        /*if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var pos = {
                     lat: position.coords.latitude,
@@ -781,7 +1138,7 @@ $$(document).on('pageInit', function (e) {
                 };
                 //map.setCenter(pos);
             });
-        }
+        }*/
     }
 });
 
