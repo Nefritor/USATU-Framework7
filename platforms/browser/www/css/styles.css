@@ -197,6 +197,17 @@
     text-align: justify;
 }
 
+.quest-full-map-floor {
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 5px;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: #fff;
+    z-index: 99
+}
+
 .build-route {
     position: fixed;
     right: 50px;
