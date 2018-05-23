@@ -386,6 +386,8 @@ function setLayer(fusionId, layerFillColor, layerType, floor) {
 
         setTimeout("$$('.floor-elem').removeAttr('disabled')", 1000); //включаем возможность изменения floor
 
+        $$('.quest-full-map-floor').text("Этаж: " + floor);
+
         queryEnd = true;
     });
 }
