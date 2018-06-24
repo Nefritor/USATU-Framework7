@@ -5,8 +5,57 @@ var myApp = new Framework7({
     //swipePanelActiveArea: 10,
     //pushState: true,
     //uniqueHistory: true,
-
 });
+
+var welcomescreen_slides = [
+    {
+        id: 'slide0',
+        title: 'Добро пожаловать!', // optional
+        picture: '<div class="welcomeicon">😎</div>',
+        text: 'Это приложение для выполнения квестов в реальности.'
+    },
+    {
+        id: 'slide1',
+        title: 'Это страница с заданиями', // optional
+        picture: '<img src="img/s1.png" style="width: 50%; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149)"/>',
+        text: 'Здесь ты можешь увидеть все задания и перейти к любой.'
+    },
+    {
+        id: 'slide2',
+        title: 'Так же...', // optional
+        picture: '<img src="img/s2.png" style="width: 50%; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149)"/>',
+        text: '... ты можешь удалить не нужное задание, смахнув его влево.'
+    },
+    {
+        id: 'slide3',
+        title: 'Контекстная кнопка в верхнем углу...', // optional
+        picture: '<img src="img/s3.png" style="width: 50%; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149)"/>',
+        text: '... позволит отобразить скрытые задания.'
+    },
+    {
+        id: 'slide4',
+        title: 'Здесь находятся как удаленные задания...', // optional
+        picture: '<img src="img/s4.png" style="width: 50%; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149)"/>',
+        text: '... так и выполненные. Любое удаленное задание можно восстановить свайпом влево.'
+    },
+    {
+        id: 'slide5',
+        title: 'Это страница с заданием.', // optional
+        picture: '<img src="img/s5.png" style="width: 50%; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149)"/>',
+        text: 'Здесь находится вся необходимая информация, а также можно построить маршрут до места мероприятия.'
+    },
+    {
+        id: 'slide6',
+        title: 'На этом твое обучение окончено.',
+        picture: '<div class="welcomeicon">😁</div>',
+        text: 'Теперь ты можешь больше!<br><br><a class="close-welcomescreen button button-raised" style="background-color: #fff; width: 50%; margin-left: auto; margin-right: auto; padding-top: 3px" href="#">Закрыть</a>'
+    }
+];
+var options = {
+    'bgcolor': '#2196f3',
+    'fontcolor': '#fff',
+    'closeButtonText' : 'Пропустить',
+};
 
 // If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
@@ -34,7 +83,7 @@ var mainView = myApp.addView('.view-main', {
 if (!!storedLogin){
     var username = storedLogin["username"];
     var password = storedLogin["password"];
-    logining(username, password);
+    logining(username, password, false);
 } else {
     myApp.loginScreen();
     mainView.hideToolbar();
@@ -44,7 +93,7 @@ if (!!storedLogin){
 $$('.login-button').on('click', function () {
     var username = $$('.item-input').find('input[name="username"]').val();
     var password = $$('.item-input').find('input[name="password"]').val();
-    logining(username, password);
+    logining(username, password, true);
 });
 
 $$('#reg-pass-conf').on('blur', function () {
@@ -168,7 +217,7 @@ function openUserEdit(haveCancel) {
 }
 
 // User logining
-function logining(username, password) {
+function logining(username, password, showWelcome) {
     myApp.showIndicator();
     $$.post('http://nefritor.h1n.ru/php/login.php', {username:username, password: password}, function (data) {
         if (data === '-1') {
@@ -193,6 +242,8 @@ function logining(username, password) {
                 force: true
             });
             mainPage = mainView.activePage.url;
+            if (showWelcome)
+                var welcomescreen = myApp.welcomescreen(welcomescreen_slides, options);
         }
         myApp.hideIndicator();
     });
@@ -881,6 +932,9 @@ $$(document).on('pageInit', function (e) {
                 openUserEdit(true);
             });
             openUserEdit(true);
+        });
+        $$('.open-tutorial').on('click', function () {
+            var welcomescreen = myApp.welcomescreen(welcomescreen_slides, options);
         });
 
         $$('.goto-index').on('click', function () {
